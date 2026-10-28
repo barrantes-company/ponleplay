@@ -23,6 +23,11 @@ import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 
+private val WidgetInk = ColorProvider(Color(0xFF0D0C0B), Color(0xFF0D0C0B))
+private val WidgetPaper = ColorProvider(Color(0xFFF6F2EA), Color(0xFFF6F2EA))
+private val WidgetMuted = ColorProvider(Color(0xFFAAA39A), Color(0xFFAAA39A))
+private val WidgetAmber = ColorProvider(Color(0xFFF3B45F), Color(0xFFF3B45F))
+
 class PonleplayWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: android.content.Context, id: GlanceId) {
         provideContent { WidgetContent() }
@@ -30,31 +35,34 @@ class PonleplayWidget : GlanceAppWidget() {
 
     @Composable
     private fun WidgetContent() {
-        val bg = ColorProvider(Color(0xFF0B0B0B), Color(0xFF0B0B0B))
-        val accent = ColorProvider(Color(0xFFF2B35D), Color(0xFFF2B35D))
-        val primary = ColorProvider(Color(0xFFF4F0E8), Color(0xFFF4F0E8))
-        val secondary = ColorProvider(Color(0xFFAAA49B), Color(0xFFAAA49B))
-        val launch = actionStartActivity<co.barrantes.ponleplay.MainActivity>()
+        val openPlayer = actionStartActivity<co.barrantes.ponleplay.MainActivity>()
 
         Column(
-            modifier = GlanceModifier.fillMaxSize().background(bg).padding(16.dp).clickable(launch),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.Start
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .background(WidgetInk)
+                .padding(18.dp)
+                .clickable(openPlayer),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("PONLEPLAY", style = TextStyle(color = accent))
-            Spacer(GlanceModifier.height(6.dp))
-            Text("Reproductor multimedia", style = TextStyle(color = primary))
-            Spacer(GlanceModifier.height(4.dp))
-            Text("Toca para abrir y reproducir", style = TextStyle(color = secondary))
-            Spacer(GlanceModifier.height(12.dp))
             Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("◀◀", style = TextStyle(color = primary))
-                Spacer(GlanceModifier.width(18.dp))
-                Text("▶", style = TextStyle(color = accent))
-                Spacer(GlanceModifier.width(18.dp))
-                Text("▶▶", style = TextStyle(color = primary))
-                Spacer(GlanceModifier.width(18.dp))
-                Text("PIP", style = TextStyle(color = accent))
+                Text("PONLEPLAY", style = TextStyle(color = WidgetAmber))
+                Spacer(GlanceModifier.width(8.dp))
+                Text("NOW PLAYING", style = TextStyle(color = WidgetMuted))
+            }
+            Spacer(GlanceModifier.height(10.dp))
+            Text("Reproductor multimedia", style = TextStyle(color = WidgetPaper))
+            Spacer(GlanceModifier.height(4.dp))
+            Text("Toca para continuar donde lo dejaste", style = TextStyle(color = WidgetMuted))
+            Spacer(GlanceModifier.height(16.dp))
+            Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("◀ 10", style = TextStyle(color = WidgetPaper))
+                Spacer(GlanceModifier.width(20.dp))
+                Text("▶", style = TextStyle(color = WidgetAmber))
+                Spacer(GlanceModifier.width(20.dp))
+                Text("10 ▶", style = TextStyle(color = WidgetPaper))
+                Spacer(GlanceModifier.width(20.dp))
+                Text("PIP", style = TextStyle(color = WidgetAmber))
             }
         }
     }
