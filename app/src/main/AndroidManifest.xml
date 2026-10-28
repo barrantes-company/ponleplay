@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-
+    <uses-feature android:name="android.software.picture_in_picture" android:required="false" />
     <application
         android:theme="@style/Theme.Ponleplay"
         android:label="PONLEPLAY"
@@ -10,13 +10,14 @@
         android:supportsRtl="true">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service
             android:name=".playback.PlaybackService"
             android:exported="true"
@@ -26,16 +27,13 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-
         <receiver
             android:name=".widget.PonleplayWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/ponleplay_widget_info" />
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/ponleplay_widget_info" />
         </receiver>
     </application>
 </manifest>
