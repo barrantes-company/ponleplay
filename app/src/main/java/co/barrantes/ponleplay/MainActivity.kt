@@ -64,7 +64,21 @@ class MainActivity:ComponentActivity(){
   else Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),verticalArrangement=Arrangement.spacedBy(18.dp)){
    Row(Modifier.fillMaxWidth()){Text("PONLEPLAY",color=Amber,fontWeight=FontWeight.Bold,letterSpacing=1.2.sp);Spacer(Modifier.weight(1f));Text("MEDIA PLAYER",color=Muted,fontSize=11.sp)}
    Text("Tu contenido.\nA un toque.",color=Paper,style=MaterialTheme.typography.displaySmall)
-   if(video&&mc!=null){Text(name,color=Muted,maxLines=1);Card(Modifier.fillMaxWidth().aspectRatio(ratio),shape=RoundedCornerShape(24.dp),colors=CardDefaults.cardColors(Color.Black)){AndroidView(factory={ctx->PlayerView(ctx).apply{useController=true;keepScreenOn=true;this.player=mc}},modifier=Modifier.fillMaxSize(),update={it.player=mc})};Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly){TextButton({mc?.seekBack()}){Text("−10",color=Paper)};Button({if(playing)mc?.pause()else mc?.play()},shape=RoundedCornerShape(50),colors=ButtonDefaults.buttonColors(Amber,Ink)){Text(if(playing)"❚❚"else"▶",fontSize=22.sp)};TextButton({mc?.seekForward()}){Text("+10",color=Paper)}};Row(Modifier.align(Alignment.CenterHorizontally),horizontalArrangement=Arrangement.spacedBy(10.dp)){Button({onPip()},colors=ButtonDefaults.buttonColors(Panel,Paper)){Text("PIP")};Button({full=true;onFullscreen(true)},colors=ButtonDefaults.buttonColors(Amber,Ink)){Text("PANTALLA COMPLETA")}}}
+   if(video&&mc!=null){
+    Text(name,color=Muted,maxLines=1,fontSize=15.sp)
+    Card(Modifier.fillMaxWidth().heightIn(min=300.dp,max=520.dp),shape=RoundedCornerShape(26.dp),colors=CardDefaults.cardColors(Color.Black)){
+     AndroidView(factory={ctx->PlayerView(ctx).apply{useController=true;resizeMode=androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT;keepScreenOn=true;this.player=mc}},modifier=Modifier.fillMaxSize(),update={it.player=mc})
+    }
+    Row(Modifier.fillMaxWidth().padding(horizontal=18.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween){
+     TextButton({mc?.seekBack()}){Text("−10",color=Paper,fontSize=16.sp)}
+     Button({if(playing)mc?.pause()else mc?.play()},modifier=Modifier.size(width=92.dp,height=54.dp),shape=RoundedCornerShape(28.dp),colors=ButtonDefaults.buttonColors(Amber,Ink)){Text(if(playing)"❚❚"else"▶",fontSize=22.sp)}
+     TextButton({mc?.seekForward()}){Text("+10",color=Paper,fontSize=16.sp)}
+    }
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)){
+     OutlinedButton({onPip()},modifier=Modifier.weight(0.8f).height(52.dp),shape=RoundedCornerShape(18.dp),border=ButtonDefaults.outlinedButtonBorder,colors=ButtonDefaults.outlinedButtonColors(contentColor=Paper)){Text("PIP")}
+     Button({full=true;onFullscreen(true)},modifier=Modifier.weight(1.6f).height(52.dp),shape=RoundedCornerShape(18.dp),colors=ButtonDefaults.buttonColors(Amber,Ink)){Text("PANTALLA COMPLETA",fontSize=13.sp,fontWeight=FontWeight.Bold)}
+    }
+   }
    else Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(24.dp),colors=CardDefaults.cardColors(Panel)){Column(Modifier.padding(22.dp)){Text("LISTO PARA REPRODUCIR",color=Amber,fontSize=12.sp,fontWeight=FontWeight.Bold);Text("Tu espacio multimedia",color=Paper,style=MaterialTheme.typography.titleLarge);Text("Selecciona un video o audio local.",color=Muted)}}
    Spacer(Modifier.weight(1f));Button({picker.launch(arrayOf("audio/*","video/*"))},Modifier.fillMaxWidth().height(56.dp),shape=RoundedCornerShape(18.dp),colors=ButtonDefaults.buttonColors(Amber,Ink)){Text(if(name.isEmpty())"Elegir contenido"else"Cambiar contenido",fontWeight=FontWeight.Bold)}
   }
