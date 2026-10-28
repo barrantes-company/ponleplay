@@ -3,7 +3,6 @@ package co.barrantes.ponleplay
 import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.util.Rational
@@ -11,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,24 +18,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Replay10
-import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,10 +52,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val saved = getPreferences(MODE_PRIVATE).getString("last_uri", null)
-        val initial = saved?.let(Uri::parse)
         setContent {
             PonleplayApp(
-                initialUri = initial,
+                initialUri = saved?.let(Uri::parse),
                 onMediaSelected = ::selectMedia,
                 onEnterPip = ::enterPip
             )
@@ -74,34 +62,23 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun selectMedia(uri: Uri) {
-        contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        try {
+            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        } catch (_: SecurityException) { }
         getPreferences(MODE_PRIVATE).edit().putString("last_uri", uri.toString()).apply()
         currentUri = uri
-    }
-
-    fun playVideo(uri: Uri): ExoPlayer {
-        player?.release()
-        currentUri = uri
-        player = ExoPlayer.Builder(this).build().apply {
-            setMediaItem(MediaItem.fromUri(uri))
-            prepare()
-            playWhenReady = true
-        }
-        return player!!
     }
 
     private fun enterPip() {
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
             enterPictureInPictureMode(
-                PictureInPictureParams.Builder()
-                    .setAspectRatio(Rational(16, 9))
-                    .build()
+                PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build()
             )
         }
     }
 
     override fun onUserLeaveHint() {
-        if (currentUri != null && player?.isPlaying == true) enterPip()
+        if (currentUri != null) enterPip()
         super.onUserLeaveHint()
     }
 
@@ -112,14 +89,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@androidx.compose.runtime.Composable
+@Composable
 private fun PonleplayApp(
     initialUri: Uri?,
     onMediaSelected: (Uri) -> Unit,
     onEnterPip: () -> Unit
 ) {
     val context = LocalContext.current
-    var selectedUri by remember { mutableStateOf(initialUri) }
     var selectedName by remember { mutableStateOf(initialUri?.lastPathSegment ?: "Elige un archivo local") }
     var player by remember { mutableStateOf<ExoPlayer?>(null) }
     var isVideo by remember { mutableStateOf(false) }
@@ -128,7 +104,6 @@ private fun PonleplayApp(
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         uri ?: return@rememberLauncherForActivityResult
         val type = context.contentResolver.getType(uri).orEmpty()
-        selectedUri = uri
         selectedName = uri.lastPathSegment ?: "Contenido seleccionado"
         isVideo = type.startsWith("video/")
         onMediaSelected(uri)
@@ -172,17 +147,16 @@ private fun PonleplayApp(
                             factory = { PlayerView(it).apply { useController = true; this.player = player } },
                             update = { it.player = player }
                         )
-                        IconButton(
-                            onClick = onEnterPip,
-                            modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)
-                        ) { Icon(Icons.Default.Fullscreen, "Pantalla flotante", tint = Color.White) }
+                        IconButton(onClick = onEnterPip, modifier = Modifier.align(Alignment.TopEnd).padding(6.dp)) {
+                            Text("PIP", color = Color.White)
+                        }
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                        IconButton(onClick = { player?.seekBack() }) { Icon(Icons.Default.Replay10, "Retroceder", tint = Color.White) }
+                        IconButton(onClick = { player?.seekBack() }) { Text("−10", color = Color.White) }
                         IconButton(onClick = { if (isPlaying) player?.pause() else player?.play() }) {
-                            Icon(if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow, "Reproducir", tint = Color.White, modifier = Modifier.size(44.dp))
+                            Text(if (isPlaying) "❚❚" else "▶", color = Color.White, style = MaterialTheme.typography.headlineMedium)
                         }
-                        IconButton(onClick = { player?.seekForward() }) { Icon(Icons.Default.Forward10, "Avanzar", tint = Color.White) }
+                        IconButton(onClick = { player?.seekForward() }) { Text("+10", color = Color.White) }
                     }
                 } else {
                     Text("Selecciona un video para verlo aquí o usa el widget para abrirlo rápidamente.", color = Color(0xFFAAA49B))
