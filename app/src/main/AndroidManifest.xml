@@ -35,5 +35,8 @@
             </intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/ponleplay_widget_info" />
         </receiver>
+        <receiver
+            android:name=".widget.PlaybackActionReceiver"
+            android:exported="false" />
     </application>
 </manifest>
